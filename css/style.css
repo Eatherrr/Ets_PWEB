@@ -1,0 +1,50 @@
+/* Hero Section */
+.hero-section {
+  background-color: #b6030fc9 ;  /* merah lebih gelap dari navbar (#dc3545) */
+  padding-top: 80px;
+  padding-bottom: 80px;
+}
+
+/* Menu Card */
+.menu-card {
+  border: none;
+  border-radius: 12px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.menu-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Foto menu */
+.card-img-top {
+  border-radius: 12px 12px 0 0;
+}
+
+/* Filter button active state */
+.filter-btn.active {
+  background-color: #dc3545 !important;
+  color: white !important;
+  border-color: #dc3545 !important;
+}
+
+/* Cart item baris */
+.cart-row {
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.cart-row:last-child {
+  border-bottom: none;
+}
+
+/* Responsive: layar kecil */
+@media (max-width: 576px) {
+  .card-title {
+    font-size: 0.85rem;
+  }
+  .card-text {
+    font-size: 0.75rem;
+  }
+}

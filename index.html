@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mape Restourant - Pesan Makanan Online</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-danger sticky-top shadow">
+    <div class="container">
+      <a class="navbar-brand fw-bold fs-4" href="index.html">
+        <i class="bi bi-egg-fried me-2"></i>Mape Restourant
+      </a>
+      <div class="d-flex align-items-center gap-2 ms-auto">
+
+        <!-- Belum login -->
+        <div id="navLogin">
+          <button class="btn btn-outline-light btn-sm" data-bs-toggle="modal" data-bs-target="#modalLogin">
+            <i class="bi bi-person-circle me-1"></i>Login
+          </button>
+        </div>
+
+        <!-- Sudah login -->
+        <div id="navUser" style="display:none;">
+          <span class="text-white me-1"><span id="namaUserNav"></span></span>
+          <button class="btn btn-outline-light btn-sm" onclick="logoutAkun()">Logout</button>
+        </div>
+
+        <!-- Keranjang -->
+        <button class="btn btn-warning position-relative" data-bs-toggle="offcanvas" data-bs-target="#offcanvasCart">
+          <i class="bi bi-cart-fill me-1"></i>Keranjang
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark" id="cartCount">0</span>
+        </button>
+
+      </div>
+    </div>
+  </nav>
+
+  <!-- Offcanvas Cart -->
+  <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasCart">
+    <div class="offcanvas-header bg-danger text-white">
+      <h5 class="offcanvas-title"><i class="bi bi-cart3 me-2"></i>Keranjang</h5>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body d-flex flex-column">
+
+      <!-- Daftar item -->
+      <div id="cartItems">
+        <p class="text-center text-muted mt-4">Keranjang masih kosong 🛒</p>
+      </div>
+
+      <!-- Total + Form di bawah -->
+      <div class="mt-auto">
+        <hr />
+        <div class="d-flex justify-content-between fw-bold fs-5 mb-3">
+          <span>Total</span>
+          <span class="text-danger" id="totalHarga">Rp 0</span>
+        </div>
+
+        <div class="mb-2">
+          <label class="form-label fw-semibold">Nama <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="nama" placeholder="Nama lengkap" />
+        </div>
+
+        <div class="mb-2">
+          <label class="form-label fw-semibold">Nomor HP <span class="text-danger">*</span></label>
+          <div class="input-group">
+            <span class="input-group-text">+62</span>
+            <input type="tel" class="form-control" id="nomorHP" placeholder="8xxxxxxxxx" />
+          </div>
+        </div>
+
+        <div class="mb-2">
+          <label class="form-label fw-semibold">Alamat <span class="text-danger">*</span></label>
+          <textarea class="form-control" id="alamat" rows="2" placeholder="Tulis alamat lengkap..."></textarea>
+        </div>
+
+        <div class="mb-2">
+          <label class="form-label fw-semibold">Catatan (Opsional)</label>
+          <input type="text" class="form-control" id="catatan" placeholder="Contoh: tidak pakai pedas" />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Pembayaran <span class="text-danger">*</span></label>
+          <select class="form-select" id="pembayaran">
+            <option value="">-- Pilih Metode --</option>
+            <option value="COD">💵 Bayar di Tempat (COD)</option>
+            <option value="Transfer BCA">🏦 Transfer Bank BCA</option>
+            <option value="Transfer BNI">🏦 Transfer Bank BNI</option>
+            <option value="GoPay">📱 GoPay</option>
+            <option value="OVO">📱 OVO</option>
+            <option value="DANA">📱 DANA</option>
+          </select>
+        </div>
+
+        <button class="btn btn-danger w-100 fw-bold" onclick="checkout()">
+          <i class="bi bi-check-circle me-2"></i>Pesan Sekarang
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <section class="hero-section text-white text-center py-5">
+    <div class="container py-3">
+      <h1 class="display-5 fw-bold">Makan enak setiap hari</h1>
+      <p class="lead mb-4">Pilih Menu favoritmu, checkout, dan makanan akan di antar secepat kilat!!!</p>
+      <a href="#menu" class="btn btn-warning btn-lg fw-bold px-4">
+        <i class="bi bi-arrow-down-circle me-2"></i>Lihat Menu
+      </a>
+    </div>
+  </section>
+
+  <!-- Filter Kategori -->
+  <div class="container mt-5" id="menu">
+    <h3 class="fw-bold mb-3 text-center">Menu Kami</h3>
+    <div class="d-flex gap-2 flex-wrap justify-content-center mb-4">
+      <button class="btn btn-danger filter-btn" onclick="filterMenu('semua', this)">Semua</button>
+      <button class="btn btn-outline-danger filter-btn" onclick="filterMenu('makanan', this)">Makanan</button>
+      <button class="btn btn-outline-danger filter-btn" onclick="filterMenu('minuman', this)">Minuman</button>
+      <button class="btn btn-outline-danger filter-btn" onclick="filterMenu('dessert', this)">Dessert</button>
+    </div>
+  </div>
+
+  <!-- Menu Grid -->
+  <div class="container mb-5">
+    <div class="row g-4">
+
+      <div class="col-6 col-md-4 col-lg-3 menu-item" data-kategori="makanan">
+        <div class="card h-100 shadow-sm menu-card">
+          <img src="img/Nasgor.jpg" class="card-img-top" style="height: 120px; object-fit: cover;" alt="Nasi Goreng">
+          <div class="card-body d-flex flex-column">
+            <h6 class="card-title fw-bold">Nasi Goreng Spesial</h6>
+            <p class="card-text text-muted small">Nasi goreng dengan telur, ayam, dengan perpaduan rempah yang lezat</p>
+            <div class="mt-auto">
+              <p class="fw-bold text-danger mb-2">Rp 25.000</p>
+              <button class="btn btn-danger btn-sm w-100" onclick="addToCart('Nasi Goreng Spesial', 25000)">
+                <i class="bi bi-cart-plus"></i> Tambah
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-4 col-lg-3 menu-item" data-kategori="makanan">
+        <div class="card h-100 shadow-sm menu-card">
+          <img src="img/AyamBakar.jpg" class="card-img-top" style="height: 120px; object-fit: cover;" alt="Ayam Bakar">
+          <div class="card-body d-flex flex-column">
+            <h6 class="card-title fw-bold">Ayam Bakar</h6>
+            <p class="card-text text-muted small">Ayam bakar dengan sambal dan lalapan segar</p>
+            <div class="mt-auto">
+              <p class="fw-bold text-danger mb-2">Rp 35.000</p>
+              <button class="btn btn-danger btn-sm w-100" onclick="addToCart('Ayam Bakar', 35000)">
+                <i class="bi bi-cart-plus"></i> Tambah
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-4 col-lg-3 menu-item" data-kategori="makanan">
+        <div class="card h-100 shadow-sm menu-card">
+          <img src="img/MieGoreng.jpg" class="card-img-top" style="height: 120px; object-fit: cover;" alt="Mie Goreng">
+          <div class="card-body d-flex flex-column">
+            <h6 class="card-title fw-bold">Mie Goreng</h6>
+            <p class="card-text text-muted small">Mie goreng dengan sayur dan bakso pilihan</p>
+            <div class="mt-auto">
+              <p class="fw-bold text-danger mb-2">Rp 22.000</p>
+              <button class="btn btn-danger btn-sm w-100" onclick="addToCart('Mie Goreng', 22000)">
+                <i class="bi bi-cart-plus"></i> Tambah
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-4 col-lg-3 menu-item" data-kategori="makanan">
+        <div class="card h-100 shadow-sm menu-card">
+          <img src="img/Rendang.jpg" class="card-img-top" style="height: 120px; object-fit: cover;" alt="Rendang Daging">
+          <div class="card-body d-flex flex-column">
+            <h6 class="card-title fw-bold">Rendang Daging</h6>
+            <p class="card-text text-muted small">Rendang sapi dengan rempah asli Minang</p>
+            <div class="mt-auto">
+              <p class="fw-bold text-danger mb-2">Rp 45.000</p>
+              <button class="btn btn-danger btn-sm w-100" onclick="addToCart('Rendang Daging', 45000)">
+                <i class="bi bi-cart-plus"></i> Tambah
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-4 col-lg-3 menu-item" data-kategori="makanan">
+        <div class="card h-100 shadow-sm menu-card">
+          <img src="img/SotoAyam.jpg" class="card-img-top" style="height: 120px; object-fit: cover;" alt="Soto Ayam">
+          <div class="card-body d-flex flex-column">
+            <h6 class="card-title fw-bold">Soto Ayam</h6>
+            <p class="card-text text-muted small">Soto kuning hangat dengan ayam suwir dan telur</p>
+            <div class="mt-auto">
+              <p class="fw-bold text-danger mb-2">Rp 20.000</p>
+              <button class="btn btn-danger btn-sm w-100" onclick="addToCart('Soto Ayam', 20000)">
+                <i class="bi bi-cart-plus"></i> Tambah
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-4 col-lg-3 menu-item" data-kategori="makanan">
+        <div class="card h-100 shadow-sm menu-card">
+          <img src="img/GadoGado.jpg" class="card-img-top" style="height: 120px; object-fit: cover;" alt="Gado-Gado">
+          <div class="card-body d-flex flex-column">
+            <h6 class="card-title fw-bold">Gado-Gado</h6>
+            <p class="card-text text-muted small">Sayuran segar dengan bumbu kacang spesial</p>
+            <div class="mt-auto">
+              <p class="fw-bold text-danger mb-2">Rp 18.000</p>
+              <button class="btn btn-danger btn-sm w-100" onclick="addToCart('Gado-Gado', 18000)">
+                <i class="bi bi-cart-plus"></i> Tambah
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-4 col-lg-3 menu-item" data-kategori="minuman">
+        <div class="card h-100 shadow-sm menu-card">
+          <img src="img/EsTeh.jpg" class="card-img-top" style="height: 120px; object-fit: cover;" alt="Es Teh Manis">
+          <div class="card-body d-flex flex-column">
+            <h6 class="card-title fw-bold">Es Teh Manis</h6>
+            <p class="card-text text-muted small">Es teh manis segar</p>
+            <div class="mt-auto">
+              <p class="fw-bold text-danger mb-2">Rp 8.000</p>
+              <button class="btn btn-danger btn-sm w-100" onclick="addToCart('Es Teh Manis', 8000)">
+                <i class="bi bi-cart-plus"></i> Tambah
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-4 col-lg-3 menu-item" data-kategori="minuman">
+        <div class="card h-100 shadow-sm menu-card">
+          <img src="img/EsJeruk.jpg" class="card-img-top" style="height: 120px; object-fit: cover;" alt="Es Jeruk">
+          <div class="card-body d-flex flex-column">
+            <h6 class="card-title fw-bold">Es Jeruk</h6>
+            <p class="card-text text-muted small">Es jeruk segar</p>
+            <div class="mt-auto">
+              <p class="fw-bold text-danger mb-2">Rp 12.000</p>
+              <button class="btn btn-danger btn-sm w-100" onclick="addToCart('Es Jeruk', 12000)">
+                <i class="bi bi-cart-plus"></i> Tambah
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-4 col-lg-3 menu-item" data-kategori="minuman">
+        <div class="card h-100 shadow-sm menu-card">
+          <img src="img/EsKelapaMuda.jpeg" class="card-img-top" style="height: 120px; object-fit: cover;" alt="Es Kelapa Muda">
+          <div class="card-body d-flex flex-column">
+            <h6 class="card-title fw-bold">Es Kelapa Muda</h6>
+            <p class="card-text text-muted small">Kelapa muda segar dengan air dan daging kelapa</p>
+            <div class="mt-auto">
+              <p class="fw-bold text-danger mb-2">Rp 15.000</p>
+              <button class="btn btn-danger btn-sm w-100" onclick="addToCart('Es Kelapa Muda', 15000)">
+                <i class="bi bi-cart-plus"></i> Tambah
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-4 col-lg-3 menu-item" data-kategori="minuman">
+        <div class="card h-100 shadow-sm menu-card">
+          <img src="img/EsDawet.jpg" class="card-img-top" style="height: 120px; object-fit: cover;" alt="Es Dawet">
+          <div class="card-body d-flex flex-column">
+            <h6 class="card-title fw-bold">Es Dawet</h6>
+            <p class="card-text text-muted small">Minuman manis yang menyegarkan</p>
+            <div class="mt-auto">
+              <p class="fw-bold text-danger mb-2">Rp 12.000</p>
+              <button class="btn btn-danger btn-sm w-100" onclick="addToCart('Es Dawet', 12000)">
+                <i class="bi bi-cart-plus"></i> Tambah
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-4 col-lg-3 menu-item" data-kategori="dessert">
+        <div class="card h-100 shadow-sm menu-card">
+          <img src="img/Pudding.jpg" class="card-img-top" style="height: 120px; object-fit: cover;" alt="Pudding Coklat">
+          <div class="card-body d-flex flex-column">
+            <h6 class="card-title fw-bold">Pudding Coklat</h6>
+            <p class="card-text text-muted small">Pudding coklat lembut dengan topping susu kental manis</p>
+            <div class="mt-auto">
+              <p class="fw-bold text-danger mb-2">Rp 10.000</p>
+              <button class="btn btn-danger btn-sm w-100" onclick="addToCart('Pudding Coklat', 10000)">
+                <i class="bi bi-cart-plus"></i> Tambah
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-4 col-lg-3 menu-item" data-kategori="dessert">
+        <div class="card h-100 shadow-sm menu-card">
+          <img src="img/EsCampur.png" class="card-img-top" style="height: 120px; object-fit: cover;" alt="Es Campur">
+          <div class="card-body d-flex flex-column">
+            <h6 class="card-title fw-bold">Es Campur</h6>
+            <p class="card-text text-muted small">Es campur dengan cincau, kolang-kaling, dan sirup</p>
+            <div class="mt-auto">
+              <p class="fw-bold text-danger mb-2">Rp 14.000</p>
+              <button class="btn btn-danger btn-sm w-100" onclick="addToCart('Es Campur', 14000)">
+                <i class="bi bi-cart-plus"></i> Tambah
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast Notifikasi -->
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 999">
+    <div id="toastKeranjang" class="toast align-items-center text-white bg-success border-0" role="alert">
+      <div class="d-flex">
+        <div class="toast-body" id="toastPesan">Item berhasil ditambahkan!</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-dark text-white text-center py-4 mt-3">
+    <p class="mb-1 fw-bold"><i class="bi bi-egg-fried me-2"></i>Mape Restourant</p>
+    <p class="text-muted small mb-0">© 2024 Mape Restourant. Makan enak, pesan gampang!</p>
+  </footer>
+
+  <!-- Modal Login -->
+  <div class="modal fade" id="modalLogin" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title"><i class="bi bi-person-circle me-2"></i>Login</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p id="pesanLogin" class="text-danger small mb-3" style="display:none;"></p>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Username</label>
+            <input type="text" class="form-control" id="loginUsername" placeholder="Masukkan username" />
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Password</label>
+            <input type="password" class="form-control" id="loginPassword" placeholder="Masukkan password" />
+          </div>
+          <button class="btn btn-danger w-100 fw-bold" onclick="loginAkun()">Masuk</button>
+          <hr />
+          <p class="text-center text-muted small mb-0">
+            Belum punya akun?
+            <a href="#" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#modalDaftar">Daftar di sini</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Daftar Akun -->
+  <div class="modal fade" id="modalDaftar" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title"><i class="bi bi-person-plus me-2"></i>Buat Akun</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p id="pesanDaftar" class="small mb-3" style="display:none;"></p>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Nama Lengkap</label>
+            <input type="text" class="form-control" id="daftarNama" placeholder="Nama kamu" />
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Username</label>
+            <input type="text" class="form-control" id="daftarUsername" placeholder="Buat username" />
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Password</label>
+            <input type="password" class="form-control" id="daftarPassword" placeholder="Buat password" />
+          </div>
+          <button class="btn btn-danger w-100 fw-bold" onclick="daftarAkun()">Daftar Sekarang</button>
+          <hr />
+          <p class="text-center text-muted small mb-0">
+            Sudah punya akun?
+            <a href="#" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#modalLogin">Login di sini</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/main.js"></script>
+
+</body>
+</html>
